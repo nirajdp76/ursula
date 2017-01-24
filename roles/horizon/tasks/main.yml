@@ -204,7 +204,7 @@
 - meta: flush_handlers
 
 - name: ensure apache started
-  service: name="{{ apache.service_name[os] }}" state=started
+  service: name="{{ apache.service_name[os] }}" state=started enabled=yes
   when: os == 'ubuntu'
 
 - name: Permit HTTP and HTTPS
@@ -229,7 +229,7 @@
 - meta: flush_handlers
 
 - name: ensure apache is enabled
-  service: name="{{ apache.service_name[os] }}" state=started enabled=true
+  service: name="{{ apache.service_name[os] }}" state=started enabled=yes
 
 - include: monitoring.yml
   tags:

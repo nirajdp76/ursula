@@ -243,7 +243,7 @@
         - /etc/neutron/neutron.conf
         - /etc/neutron/services/loadbalancer/haproxy/lbaas_agent.ini
         - /etc/neutron/neutron_lbaas.conf
-        
+
 - name: install neutron lbaas service (rhel package)
   systemd_service:
     name: "{{ item.key }}"
@@ -282,14 +282,14 @@
 - meta: flush_handlers
 
 - name: start neutron-data-network services
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   with_items:
     - neutron-l3-agent
     - neutron-dhcp-agent
     - neutron-metadata-agent
 
 - name: start neutron lbaas agent
-  service: name=neutron-lbaasv2-agent state=started
+  service: name=neutron-lbaasv2-agent state=started enabled=yes
   when: (neutron.lbaas.enabled == "smart" and
          groups['controller'][0] not in groups['compute']) or
          neutron.lbaas.enabled|bool

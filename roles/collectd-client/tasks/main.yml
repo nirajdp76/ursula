@@ -44,4 +44,4 @@
 - meta: flush_handlers
 
 - name: ensure apache is running
-  service: name=collectd state=started
+  service: name=collectd state=started enabled=yes

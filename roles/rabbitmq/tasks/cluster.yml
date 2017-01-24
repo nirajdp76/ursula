@@ -38,7 +38,7 @@
   when: erlang_cookie.changed or cluster_configuration.changed
 
 - name: start rabbitmq
-  service: name=rabbitmq-server state=started
+  service: name=rabbitmq-server state=started enabled=yes
 
 - name: wait for rabbit to start
   wait_for: port={{ rabbitmq.port }} host={{ rabbitmq.ip }} delay=2

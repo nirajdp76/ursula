@@ -97,11 +97,11 @@
 
 - name: start nova-compute
   when: openstack_install_method != 'distro'
-  service: name=nova-compute state=started
+  service: name=nova-compute state=started enabled=yes
 
 - name: start nova-compute (rhel osp)
   when: openstack_install_method == 'distro'
-  service: name=openstack-nova-compute state=started
+  service: name=openstack-nova-compute state=started enabled=yes
 
 - include: monitoring.yml
   tags:

@@ -49,4 +49,4 @@
   when: ansible_default_ipv4.interface != hostvars[inventory_hostname][primary_interface].device
 
 - name: start ipchanged service
-  service: name=ipchanged state=started enabled=true
+  service: name=ipchanged state=started enabled=yes

@@ -66,7 +66,7 @@
 - meta: flush_handlers
 
 - name: start neutron-linuxbridge-agent
-  service: name=neutron-linuxbridge-agent state=started
+  service: name=neutron-linuxbridge-agent state=started enabled=yes
   when: neutron.plugin == 'ml2'
 
 - name: cleanup interface logs

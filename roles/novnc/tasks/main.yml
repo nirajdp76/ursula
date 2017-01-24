@@ -16,5 +16,4 @@
 
 - template: src=etc/init/nova-novncproxy.conf dest=/etc/init/nova-novncproxy.conf
 
-- service: name=nova-novncproxy state=started
-
+- service: name=nova-novncproxy state=started enabled=yes

@@ -31,7 +31,7 @@
     config_files: /etc/neutron/plugins/ml2/ml2_plugin.ini
     #envs: "{{ neutron.service.envs }}"
   when: os == 'rhel' and openstack_install_method == 'distro'
-  
+
 - name: stop neutron service before db sync
   service: name=neutron-server state=stopped
   when: database_create.changed or force_sync|default('false')|bool
@@ -58,7 +58,7 @@
 - meta: flush_handlers
 
 - name: start neutron-server
-  service: name=neutron-server state=started
+  service: name=neutron-server state=started enabled=yes
 
 - name: Permit access to Neutron
   ufw: rule=allow to_port={{ endpoints.neutron.port.haproxy_api }} proto=tcp

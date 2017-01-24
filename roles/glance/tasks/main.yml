@@ -42,7 +42,7 @@
       permission: r
     - etype: other
       permission: r
-      
+
 #Glance-manage in OSP is creating the api.log with incorrect permissions
 # this prohibits glance-api from starting
 - name: glance fixme acl
@@ -82,7 +82,7 @@
     - glance-api
     - glance-registry
   when: openstack_install_method != 'distro'
-  
+
 - name: glance config
   template: src={{ item }} dest=/etc/glance mode={{ 0644 if 'policy.json' in item else 0640 }}
             owner=glance group=glance
@@ -97,7 +97,7 @@
     - glance-registry
   when: (database_create.changed or force_sync|default('false')|bool) and openstack_install_method != 'distro'
   tags: db-migrate
-  
+
 - name: stop glance services before db sync (rhel osp)
   service: name={{ item }} state=stopped
   with_items:
@@ -131,19 +131,19 @@
 - meta: flush_handlers
 
 - name: start glance services
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   with_items:
     - glance-api
     - glance-registry
   when: openstack_install_method != 'distro'
 
 - name: start glance services (rhel osp)
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   with_items:
     - openstack-glance-api
     - openstack-glance-registry
   when: openstack_install_method == 'distro'
-  
+
 - include: image-sync.yml
   when: glance.sync.enabled
 

@@ -83,7 +83,7 @@
 - meta: flush_handlers
 
 - name: start nova controller services
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   when: openstack_install_method != 'distro'
   with_items:
     - nova-api
@@ -91,9 +91,9 @@
     - nova-consoleauth
     - nova-scheduler
     - nova-novncproxy
-    
+
 - name: start nova controller services (rhel osp)
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   when: openstack_install_method == 'distro'
   with_items:
     - openstack-nova-api

@@ -39,14 +39,14 @@
 - meta: flush_handlers
 
 - name: start cinder controller services
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   with_items:
     - cinder-api
     - cinder-scheduler
   when: openstack_install_method != 'distro'
 
 - name: start cinder controller services (rhel osp)
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=yes
   with_items:
     - openstack-cinder-api
     - openstack-cinder-scheduler

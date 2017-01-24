@@ -146,7 +146,7 @@
   register: result
 
 - name: start mysql server
-  service: name=mysql state=started enabled=true
+  service: name=mysql state=started enabled=yes
   when: os == 'ubuntu' or
         ( os == 'rhel' and result.rc != 0 )
 

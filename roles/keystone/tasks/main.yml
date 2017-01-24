@@ -39,7 +39,7 @@
   set_fact:
     uwsgi_path: "{{ openstack_package.virtualenv_base }}/keystone/bin/uwsgi"
   when: openstack_install_method == 'package' and os == 'ubuntu'
-  
+
 - name: set uwsgi path (package install rhel)
   set_fact:
     uwsgi_path: "/usr/sbin/uwsgi"
@@ -142,10 +142,10 @@
 - meta: flush_handlers
 
 - name: start keystone
-  service: name=keystone state=started enabled=true
+  service: name=keystone state=started enabled=yes
 
 - name: start shibboleth service
-  service: name=shibd state=started enabled=true
+  service: name=shibd state=started enabled=yes
   when: keystone.federation.enabled|bool and keystone.federation.sp.saml.enabled|bool
 
 - name: permit access to keystone
