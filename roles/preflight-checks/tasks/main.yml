@@ -19,6 +19,14 @@
   run_once: true
 
 - block:
+  #To ensure ceph-common is installed from cloud archive repo and not bbc ceph repo
+  - name: remove ceph repo from controllers and computes
+    apt_repository:
+      repo: 'deb {{ apt_repos.ceph.repo }} {{ ansible_lsb.codename }} main'
+      state: absent
+      update_cache: yes
+    when: ('controller' in group_names) or ('compute' in group_names)
+
   - name: check ceph installed
     command: ceph --version
     register: result_ceph_installed
