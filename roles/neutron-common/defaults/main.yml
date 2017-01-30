@@ -32,6 +32,7 @@ neutron:
   allow_overlapping_ips: False
   api_workers: 3
   metadata_workers: 3
+  dhcp_force_metadata: True
   ha_keepalive_threads: 10
   overlay_ip_version: 4
   agent_down_time: 20
