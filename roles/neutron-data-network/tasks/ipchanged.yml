@@ -9,6 +9,7 @@
   template: src=usr/local/sbin/ipchanged dest=/usr/local/sbin/ipchanged
             mode=0755
 
+#FIXME Validate how this works on centos and rhel
 - name: install ipchanged configuraion
   template: src=etc/init/ipchanged.conf dest=/etc/init/ipchanged.conf mode=0644
   when: os == 'ubuntu'
@@ -16,8 +17,10 @@
 - name: ipchanged systemd service
   systemd_service:
     name: ipchanged
+    type: simple
     cmd: /usr/local/sbin/ipchanged
-
+    wanted_by: multi-user.target
+  when: os == 'rhel'
 
 - name: ipchanged dirs - undercloud
   file: dest=/etc/ipchanged/{{ item }} state=directory

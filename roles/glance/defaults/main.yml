@@ -21,6 +21,13 @@ glance:
   store_swift: False
   store_ceph: False
   store_file: False
+  service_names:
+    ubuntu:
+      glance_api: glance-api
+      glance_registry: glance-registry
+    rhel:
+      glance_api: openstack-glance-api
+      glance_registry: openstack-glance-registry
   source:
     rev: 'stable/newton'
     constrain: True

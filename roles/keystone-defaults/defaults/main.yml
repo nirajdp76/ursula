@@ -15,6 +15,11 @@ keystone:
       distro: /usr/lib/python2.7/site-packages/keystone
       source: /opt/openstack/current/keystone
       package: /opt/openstack/current/keystone
+  service_names:
+    ubuntu:
+      keystone: keystone
+    rhel:
+      keystone: openstack-keystone
   source:
     rev: 'stable/newton'
     constrain: True

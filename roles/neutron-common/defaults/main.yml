@@ -1,6 +1,23 @@
 ---
 project_name: neutron
 neutron:
+  service_names:
+    ubuntu:
+      neutron_server: neutron-server
+      neutron_dhcp_agent: neutron-dhcp-agent
+      neutron_l3_agent: neutron-l3-agent
+      neutron_openvswitch_agent: neutron-openvswitch-agent
+      neutron_linuxbridge_agent: neutron-linuxbridge-agent
+      neutron_metadata_agent: neutron-metadata-agent
+      neutron_lbaasv2_agent: neutron-lbaasv2-agent
+    rhel:
+      neutron_server: neutron-server
+      neutron_dhcp_agent: neutron-dhcp-agent
+      neutron_l3_agent: neutron-l3-agent
+      neutron_openvswitch_agent: neutron-openvswitch-agent
+      neutron_linuxbridge_agent: neutron-linuxbridge-agent
+      neutron_metadata_agent: neutron-metadata-agent
+      neutron_lbaasv2_agent: neutron-lbaasv2-agent
   jellyroll: False
   enable_fatal_deprecations: True
   l2_population: False

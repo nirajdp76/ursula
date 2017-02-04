@@ -11,43 +11,23 @@
   run_once: True
   failed_when: false
   delegate_to: "{{ item[0] }}"
-  when: restart|default('True') and openstack_install_method != 'distro'
+  when: restart|default('True')
   with_nested:
     - "{{ play_hosts }}"
-    - ['cinder-api', 'cinder-scheduler', 'cinder-volume']
-
-- name: restart cinder services
-  service:
-    name: "{{ item[1] }}"
-    state: restarted
-    must_exist: false
-  run_once: True
-  failed_when: false
-  delegate_to: "{{ item[0] }}"
-  when: restart|default('True') and openstack_install_method == 'distro' 
-  with_nested:
-    - "{{ play_hosts }}"
-    - ['openstack-cinder-api', 'openstack-cinder-scheduler', 'openstack-cinder-volume']
+    - ["{{ cinder.service_names[os].cinder_api }}",
+       "{{ cinder.service_names[os].cinder_scheduler }}",
+       "{{ cinder.service_names[os].cinder_volume }}"]
 
 - name: restart cinder backup service
   service:
-    name: cinder-backup
+    name: "{{ [cinder.service_names[os].cinder_backup }}"
     state: restarted
     must_exist: false
   run_once: True
   delegate_to: "{{ item }}"
-  when: restart|default('True') and swift.enabled|default('False') and openstack_install_method != 'distro'
-  with_items: "{{ play_hosts }}"
-  
-- name: restart cinder backup service
-  service:
-    name: openstack-cinder-backup
-    state: restarted
-    must_exist: false
-  run_once: True
-  delegate_to: "{{ item }}"
-  when: restart|default('True') and swift.enabled|default('False') and openstack_install_method == 'distro'
+  when: restart|default('True') and swift.enabled|default('False')
   with_items: "{{ play_hosts }}"
 
+# FIXME variablize by OS
 - name: restart tgt service
   service: name="{{ cinder.tgt_service[os] }}" state=restarted

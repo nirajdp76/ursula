@@ -4,10 +4,10 @@
   when: restart|default('True')
   failed_when: false
   with_items:
-    - neutron-server
-    - neutron-dhcp-agent
-    - neutron-l3-agent
-    - neutron-openvswitch-agent
-    - neutron-linuxbridge-agent
-    - neutron-metadata-agent
-    - neutron-lbaasv2-agent
+    - "{{ neutron.service_names[os].neutron_server }}"
+    - "{{ neutron.service_names[os].neutron_dhcp_agent }}"
+    - "{{ neutron.service_names[os].neutron_l3_agent }}"
+    - "{{ neutron.service_names[os].neutron_openvswitch_agent }}"
+    - "{{ neutron.service_names[os].neutron_linuxbridge_agent }}"
+    - "{{ neutron.service_names[os].neutron_metadata_agent }}"
+    - "{{ neutron.service_names[os].neutron_lbaasv2_agent }}"

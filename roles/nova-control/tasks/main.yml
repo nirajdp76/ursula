@@ -13,41 +13,75 @@
     with_items:
       - nova-cert
 
-  - name: install nova controller services
+  - name: install nova controller services (ubuntu)
     upstart_service: name={{ item }} user=nova
                      cmd=/usr/local/bin/{{ item }}
                      config_dirs=/etc/nova
     with_items:
-      - nova-api
-      - nova-conductor
-      - nova-consoleauth
-      - nova-scheduler
-      - nova-novncproxy
+      - "{{ nova.service_names[os].nova_api }}"
+      - "{{ nova.service_names[os].nova_conductor }}"
+      - "{{ nova.service_names[os].nova_consoleauth }}"
+      - "{{ nova.service_names[os].nova_scheduler }}"
+      - "{{ nova.service_names[os].nova_novncproxy }}"
+
+  - name: permit access to nova api (ubuntu)
+    ufw: rule=allow to_port={{ endpoints.nova.port.haproxy_api }} proto=tcp
+    tags: firewall
   when: os == 'ubuntu'
 
 - block:
   - name: remove retired nova controller services
     systemd_service:
       name: "{{ item }}"
-      user: nova
-      cmd: /usr/local/bin/{{ item }}
-      config_dirs: /etc/nova
+      cmd: "{{ (ansible_distribution == 'RedHat') | ternary('/usr/bin/', '/usr/local/bin/') }}{{ item }}"
       state: absent
     with_items:
-      - nova-cert
+      - openstack-nova-cert
+      - openstack-nova-cells
 
-  - name: install nova controller services
-    systemd_service: name={{ item }} user=nova
-                     cmd=/usr/local/bin/{{ item }}
-                     config_dirs=/etc/nova
+  - name: install nova controller services (rhel)
+    systemd_service:
+      name: "{{ item.value.service_name }}"
+      description: OpenStack {{ item.value.service_name }} Service
+      type: "{{ item.value.type|default(omit) }}"
+      notify_access: "{{ item.value.notify_access|default(omit) }}"
+      user: nova
+      cmd: "{{ (ansible_distribution == 'RedHat') | ternary('/usr/bin/', '/usr/local/bin/') }}{{ item.key }}"
+      config_dirs: /etc/nova
+      restart: always
+      wanted_by: multi-user.target
+    with_dict:
+      nova-api:
+        service_name: "{{ nova.service_names[os].nova_api }}"
+        type: notify
+        notify_access: all
+      nova-conductor:
+        service_name: "{{ nova.service_names[os].nova_conductor }}"
+        type: notify
+        notify_access: all
+      nova-consoleauth:
+        service_name: "{{ nova.service_names[os].nova_consoleauth }}"
+        type: notify
+        notify_access: all
+      nova-scheduler:
+        service_name: "{{ nova.service_names[os].nova_scheduler }}"
+        type: notify
+        notify_access: all
+      nova-novncproxy:
+        service_name: "{{ nova.service_names[os].nova_novncproxy }}"
+        type: simple
+
+  - name: Permit access to nova (rhel)
+    firewalld:
+      state: enabled
+      permanent: true
+      port: "{{ item }}/tcp"
     with_items:
-      - nova-api
-      - nova-conductor
-      - nova-consoleauth
-      - nova-scheduler
-      - nova-novncproxy
-    when: os == 'rhel' and openstack_install_method == 'source'
+      - "{{ endpoints.nova.port.haproxy_api }}"
+    tags: firewall
+  when: os == 'rhel'
 
+#FIXME do we need this on rhosp?
 - name: install nova-quota-sync script
   copy: src=nova-quota-sync
         dest=/usr/local/sbin/nova-quota-sync
@@ -83,39 +117,16 @@
 - meta: flush_handlers
 
 - name: start nova controller services
-  service: name={{ item }} state=started
-  when: openstack_install_method != 'distro'
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: True
   with_items:
-    - nova-api
-    - nova-conductor
-    - nova-consoleauth
-    - nova-scheduler
-    - nova-novncproxy
-    
-- name: start nova controller services (rhel osp)
-  service: name={{ item }} state=started
-  when: openstack_install_method == 'distro'
-  with_items:
-    - openstack-nova-api
-    - openstack-nova-conductor
-    - openstack-nova-consoleauth
-    - openstack-nova-scheduler
-    - openstack-nova-novncproxy
-
-- name: permit access to nova api
-  ufw: rule=allow to_port={{ endpoints.nova.port.haproxy_api }} proto=tcp
-  when: os == 'ubuntu'
-  tags: ufw
-
-- name: Permit access to nova
-  firewalld:
-    state: enabled
-    permanent: true
-    port: "{{ item }}/tcp"
-  with_items:
-    - "{{ endpoints.nova.port.haproxy_api }}"
-  tags: firewall
-  when: os == 'rhel'
+    - "{{ nova.service_names[os].nova_api }}"
+    - "{{ nova.service_names[os].nova_conductor }}"
+    - "{{ nova.service_names[os].nova_consoleauth }}"
+    - "{{ nova.service_names[os].nova_scheduler }}"
+    - "{{ nova.service_names[os].nova_novncproxy }}"
 
 - include: monitoring.yml
   tags:

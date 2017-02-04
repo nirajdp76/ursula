@@ -1,6 +1,32 @@
 ---
 project_name: nova
 nova:
+  service_names:
+    ubuntu:
+      nova_api: nova-api
+      nova_conductor: nova-conductor
+      nova_compute: nova-compute
+      nova_consoleauth: nova-consoleauth
+      nova_novncproxy: nova-novncproxy
+      nova_scheduler: nova-scheduler
+      libvirt: libvirt-bin
+    rhel:
+      nova_api: openstack-nova-api
+      nova_conductor: openstack-nova-conductor
+      nova_compute: openstack-nova-compute
+      nova_consoleauth: openstack-nova-consoleauth
+      nova_novncproxy: openstack-nova-novncproxy
+      nova_scheduler: openstack-nova-scheduler
+      libvirt: libvirtd
+  libvirt:
+    ubuntu:
+      config_file: libvirtd.conf
+      defaults: /etc/default/libvirt
+      group: libvirtd
+    rhel:
+      config_file: libvirt.conf
+      defaults: /etc/sysconfig/libvirtd
+      group: libvirt
   enable_fatal_deprecations: True
   patches:
   compute_driver: libvirt.LibvirtDriver

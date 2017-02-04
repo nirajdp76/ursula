@@ -2,38 +2,51 @@
 - name: neutron api cache dir
   file: dest=/var/cache/neutron/api owner=neutron state=directory
 
-- name: install neutron-server service ( ubuntu source )
-  upstart_service:
-    name: neutron-server
-    user: neutron
-    cmd: /usr/local/bin/neutron-server
-    config_dirs: /etc/neutron
-    config_files: /etc/neutron/plugins/ml2/ml2_plugin.ini
-    envs: "{{ neutron.service.envs }}"
+- block:
+  - name: install neutron-server service ( ubuntu )
+    upstart_service:
+      name: "{{ neutron.service_names[os].neutron_server }}"
+      user: neutron
+      cmd: /usr/local/bin/neutron-server
+      config_dirs: /etc/neutron
+      config_files: /etc/neutron/plugins/ml2/ml2_plugin.ini
+      envs: "{{ neutron.service.envs }}"
+
+  - name: Permit access to Neutron (ubuntu)
+    ufw: rule=allow to_port={{ endpoints.neutron.port.haproxy_api }} proto=tcp
+    tags: firewall
   when: os == 'ubuntu'
 
-- name: install neutron-server service (rhel source)
-  systemd_service:
-    name: neutron-server
-    user: neutron
-    cmd: /usr/local/bin/neutron-server
-    config_dirs: /etc/neutron
-    config_files: /etc/neutron/plugins/ml2/ml2_plugin.ini
-    #envs: "{{ neutron.service.envs }}"
-  when: os == 'rhel' and openstack_install_method == 'source'
+- block:
+  - name: install neutron-server service (rhel)
+    systemd_service:
+      name: "{{ neutron.service_names[os].neutron_server }}"
+      description: OpenStack Neutron Server Service
+      type: notify
+      notify_access: all
+      user: neutron
+      cmd: "{{ (ansible_distribution == 'RedHat') | ternary('/usr/bin/', '/usr/local/bin/') }}neutron-server"
+      config_dirs: /etc/neutron
+      config_files: /etc/neutron/neutron.conf,/etc/neutron/plugins/ml2/ml2_plugin.ini
+      #envs: "{{ neutron.service.envs }}"
+      restart: on-failure
+      kill_mode: process
+      wanted_by: multi-user.target
 
-- name: install neutron-server service (rhel osp)
-  systemd_service:
-    name: neutron-server
-    user: neutron
-    cmd: /bin/neutron-server
-    config_dirs: /etc/neutron
-    config_files: /etc/neutron/plugins/ml2/ml2_plugin.ini
-    #envs: "{{ neutron.service.envs }}"
-  when: os == 'rhel' and openstack_install_method == 'distro'
-  
+  - name: Permit access to neutron (rhel)
+    firewalld:
+      state: enabled
+      permanent: true
+      port: "{{ item }}/tcp"
+    with_items:
+      - "{{ endpoints.neutron.port.haproxy_api }}"
+    tags: firewall
+  when: os == 'rhel'
+
 - name: stop neutron service before db sync
-  service: name=neutron-server state=stopped
+  service:
+    name: "{{ neutron.service_names[os].neutron_server }}"
+    state: stopped
   when: database_create.changed or force_sync|default('false')|bool
   tags: db-migrate
 
@@ -58,22 +71,10 @@
 - meta: flush_handlers
 
 - name: start neutron-server
-  service: name=neutron-server state=started
-
-- name: Permit access to Neutron
-  ufw: rule=allow to_port={{ endpoints.neutron.port.haproxy_api }} proto=tcp
-  tags: ufw
-  when: os == 'ubuntu'
-
-- name: Permit access to glance
-  firewalld:
-    state: enabled
-    permanent: true
-    port: "{{ item }}/tcp"
-  with_items:
-    - "{{ endpoints.neutron.port.haproxy_api }}"
-  tags: firewall
-  when: os == 'rhel'
+  service:
+    name: "{{ neutron.service_names[os].neutron_server }}"
+    state: started
+    enabled: true
 
 - include: monitoring.yml
   tags:

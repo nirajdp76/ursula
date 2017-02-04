@@ -13,6 +13,33 @@ cinder:
   create_vg: False
   common_volume_name: True
   allow_availability_zone_fallback: True
+  service_names:
+    ubuntu:
+      cinder_api: cinder-api
+      cinder_scheduler: cinder-scheduler
+      cinder_volume: cinder-volume
+      cinder_backup: cinder-backup
+    rhel:
+      cinder_api: openstack-cinder-api
+      cinder_scheduler: openstack-cinder-scheduler
+      cinder_volume: openstack-cinder-volume
+      cinder_backup: openstack-cinder-backup
+  data_pkgs:
+    ubuntu:
+      - cryptsetup
+      - lvm2
+      - tgt
+      - nbd-client
+      - open-iscsi
+      - qemu-utils
+    #FIXME do we need these pkgs on rhel?
+    rhel:
+      - cryptsetup
+      - lvm2
+      - targetcli
+      - nbd
+      - iscsi-initiator-utils
+      - qemu-kvm-tools
   iscsi_helper:
     ubuntu: tgtadm
     rhel: targetcli

@@ -1,23 +1,44 @@
 ---
-- name: install cinder controller services
-  upstart_service: name={{ item }}
-                   user=cinder
-                   cmd=/usr/local/bin/{{ item }}
-                   config_dirs=/etc/cinder
-  when: os == 'ubuntu'
-  with_items:
-    - cinder-api
-    - cinder-scheduler
+- block:
+  - name: install cinder controller services (ubuntu)
+    upstart_service:
+      name: "{{ item }}"
+      user: cinder
+      cmd: /usr/local/bin/{{ item }}
+      config_dirs: /etc/cinder
+    with_items:
+      - "{{ cinder.service_names[os].cinder_api }}"
+      - "{{ cinder.service_names[os].cinder_scheduler }}"
 
-- name: install cinder controller services (rhel source)
-  systemd_service: name={{ item }}
-                   user=cinder
-                   cmd=/usr/local/bin/{{ item }}
-                   config_dirs=/etc/cinder
-  when: os == 'rhel' and openstack_install_method == 'source'
-  with_items:
-    - cinder-api
-    - cinder-scheduler
+  - name: Permit access to Cinder (ubuntu)
+    ufw: rule=allow to_port={{ endpoints.cinder.port.haproxy_api }} proto=tcp
+    tags: firewall
+  when: os == 'ubuntu'
+
+- block:
+  - name: install cinder controller services (rhel)
+    systemd_service:
+      name: "{{ item.0 }}"
+      description: OpenStack {{ item.1 }} Service
+      type: simple
+      user: cinder
+      config_files: /etc/cinder/cinder.conf
+      cmd: "{{ (ansible_distribution == 'RedHat') | ternary('/usr/bin/', '/usr/local/bin/') }}{{ item.1 }}"
+      config_dirs: /etc/cinder
+      restart: on-failure
+      wanted_by: multi-user.target
+    with_together:
+      - ["{{ cinder.service_names[os].cinder_api }}",
+         "{{ cinder.service_names[os].cinder_scheduler }}"]
+      - ["cinder-api","cinder-scheduler"]
+
+  - name: Permit access to Cinder (rhel)
+    firewalld:
+      state: enabled
+      permanent: true
+      port: "{{ endpoints.cinder.port.haproxy_api }}/tcp"
+    tags: firewall
+  when: os == 'rhel'
 
 - name: sync cinder database
   command: cinder-manage db sync
@@ -39,31 +60,10 @@
 - meta: flush_handlers
 
 - name: start cinder controller services
-  service: name={{ item }} state=started
+  service: name={{ item }} state=started enabled=true
   with_items:
-    - cinder-api
-    - cinder-scheduler
-  when: openstack_install_method != 'distro'
-
-- name: start cinder controller services (rhel osp)
-  service: name={{ item }} state=started
-  with_items:
-    - openstack-cinder-api
-    - openstack-cinder-scheduler
-  when: openstack_install_method == 'distro'
-
-- name: Permit access to Cinder
-  ufw: rule=allow to_port={{ endpoints.cinder.port.haproxy_api }} proto=tcp
-  tags: ufw
-  when: os == 'ubuntu'
-
-- name: Permit access to Cinder
-  firewalld:
-    state: enabled
-    permanent: true
-    port: "{{ endpoints.cinder.port.haproxy_api }}/tcp"
-  tags: firewall
-  when: os == 'rhel'
+    - "{{ cinder.service_names[os].cinder_api }}"
+    - "{{ cinder.service_names[os].cinder_scheduler }}"
 
 - include: monitoring.yml
   tags:

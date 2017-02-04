@@ -1,8 +1,8 @@
 #!/bin/bash
 
-restart neutron-server
-restart neutron-linuxbridge-agent
-restart neutron-metadata-agent
+restart {{ neutron.service_names[os].neutron_server }}
+restart {{ neutron.service_names[os].neutron_linuxbridge_agent }}
+restart {{ neutron.service_names[os].neutron_metadata_agent }}
 
 # neutron-dhcp-agent and neutron-l3-agent will be restarted
 # when neutron-linuxbridge-agent is restarted due to service deps
