@@ -27,5 +27,5 @@
 
   - name: ensure novnc dir exists
     file: src=/opt/stack/novnc/noVNC-0.5.1 dest=/usr/share/novnc state=link
-    when: not sym.stat.exists
+    when: not sym.stat.exists or sym.stat.islnk == False
   when: nova.novnc_method == 'file'

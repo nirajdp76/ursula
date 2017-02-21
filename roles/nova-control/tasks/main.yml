@@ -1,5 +1,6 @@
 ---
 - include: novnc.yml
+  when: os == 'ubuntu'
   tags: novnc
 
 - block:
