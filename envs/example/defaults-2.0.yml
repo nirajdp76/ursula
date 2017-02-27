@@ -229,6 +229,8 @@ neutron:
   tenant_network_type: vxlan
   tunnel_types:
     - vxlan
+  allow_overlapping_ips: true
+  arp_responder: False
   lbaas:
     enabled: False
   logging:
