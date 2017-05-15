@@ -1,0 +1,22 @@
+---
+- name: ensure ilmt_agent is enabled
+  assert:
+    that: "ilmt_agent.enabled"
+    msg: "ilmt_agent.enabled must be set to true to get BESClient installed on compute hosts."
+  run_once: true
+
+- name: ensure ILMT server information to download actionsite file is defined
+  assert:
+    that: "ilmt_agent.actionsite.server is defined"
+    msg: "ilmt_agent.actionsite.server must be defined when using method url"
+  run_once: true
+  when: ilmt_agent.actionsite.method == 'url'
+
+- name: ensure ILMT actionsite file content is defined
+  assert:
+    that: "ilmt_agent.actionsite.file_content is defined"
+    msg: "ilmt_agent.actionsite.file_content must be defined when using method file"
+  run_once: true
+  when: ilmt_agent.actionsite.method == 'file'
+
+# TODO Add check to validate connectivity to ILMT server

@@ -1,0 +1,14 @@
+---
+  ilmt_agent:
+    enabled: False
+    service: besclient
+    package:
+      name: BESAgent
+      version: latest
+    actionsite:
+      method: url
+      protocol: https
+      server: ~
+      port: 52311
+      url_path: /cgi-bin/bfgather.exe/actionsite
+      file_content: ~

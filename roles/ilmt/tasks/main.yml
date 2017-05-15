@@ -1,0 +1,47 @@
+---
+- include: validator.yml
+  tags: ['precheck']
+
+# TODO: Can BESClient be configures to run under it's own user
+
+- name: /etc/opt/BESClient
+  file:
+    dest: /etc/opt/BESClient
+    state: directory
+    owner: root
+    group: root
+
+- name: install BESClient package
+  package:
+    name: "{{ ilmt_agent.package.name }}={{ ilmt_agent.package.version }}"
+  register: result
+  until: result|succeeded
+  retries: 5
+
+- name: download actionsite masthead file to /etc/opt/BESClient
+  get_url:
+    url: "{{ ilmt_agent.actionsite.protocol }}//{{ ilmt_agent.actionsite.server }}:{{ ilmt_agent.actionsite.port }}/{{ ilmt_agent.actionsite.protocol }}"
+    dest: /etc/opt/BESClient/actionsite.afxm
+  when: ilmt_agent.actionsite.method == 'url'
+
+- name: copy actionsite masthead file to /etc/opt/BESClient
+  template:
+    src: etc/opt/BESClient/actionsite.afxm
+    dest: /etc/opt/BESClient/actionsite.afxm
+    owner: root
+    group: root
+    mode: 0640
+  when: ilmt_agent.actionsite.method == 'file'
+
+- name: restart ilmt agent service
+  service:
+    name: "{{ ilmt_agent.service }}"
+    state: restarted
+    enabled: True
+    must_exist: false
+
+- include: monitoring.yml
+  tags:
+    - monitoring
+    - common
+  when: monitoring.enabled|default('True')|bool

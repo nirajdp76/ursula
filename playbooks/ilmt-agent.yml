@@ -1,0 +1,8 @@
+---
+# ilmt-agent
+#
+# enable ilmt BESAgent on every compute host
+
+- hosts: compute
+  roles:
+    - ../roles/ilmt

@@ -1,0 +1,5 @@
+---
+- name: besclient process check installation
+  sensu_process_check:
+    service: "{{ ilmt_agent.service }}"
+  notify: restart sensu-client

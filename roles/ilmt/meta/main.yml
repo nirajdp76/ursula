@@ -1,0 +1,9 @@
+---
+dependencies:
+  - role: monitoring-common
+    when: monitoring.enabled|default(True)|bool
+  - role: openstack-firewall
+    rule_name: "{{ ilmt_agent.service }}"
+    rules_type_input:
+      - { protocol: tcp, port: "{{ ilmt_agent.actionsite.port }}" }
+      - { protocol: udp, port: "{{ ilmt_agent.actionsite.port }}" }
