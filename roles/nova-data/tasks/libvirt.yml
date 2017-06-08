@@ -8,6 +8,7 @@
 - name: install nova-compute packages (ubuntu)
   package: name={{ item }}
   with_items:
+    - libnl-3-200={{ nova.libnl_3_200_version}}
     - librbd1={{ nova.librbd1_version }}
     - cpu-checker
     - libvirt-bin={{ nova.libvirt_bin_version }}
